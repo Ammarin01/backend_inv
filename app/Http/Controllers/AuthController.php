@@ -32,8 +32,8 @@ class AuthController extends Controller
         ]);
 
         //Create token
-        $token = $user->createToken('my-device')->plainTextToken;
-
+        $token = $user->createToken($request->userAgent(), ["$user->role"])->plainTextToken;
+        
         $response = [
             'user' => $user,
             'token' => $token,
@@ -47,11 +47,9 @@ class AuthController extends Controller
 
         //Validate
         $fields = $request->validate([
-
             'email' => 'required|string',
             'password' => 'required|string',
-
-        ]);
+            ]);
 
         //Check email
         $user = User::where('email', $fields['email'])->first();
@@ -61,21 +59,29 @@ class AuthController extends Controller
             # code...
             return response([
                 'message'=>'login failed'
-            ]); 
+            ], 401); 
         }else{
             //delete token เก่าออกแล้วค่อยสร้างใหม่
             $user->tokens()->delete();
 
                     //Create token
-                    $token = $user->createToken('my-device')->plainTextToken;
+                    $token = $user->createToken($request->userAgent(), ["$user->role"])->plainTextToken;
             
                     $response = [
                         'user' => $user,
                         'token' => $token,
                     ];
                     return response($response, 201);
-
         }
+    }
+
+    //logout
+    public function logout(Request $request){
+        
+            auth()->user()->tokens()->delete();     //auth()->user() ยูสเซอร์ที่กำลัง login
+            return  [
+                'message'=>'logged out'
+            ] ;
     }
 
 }
