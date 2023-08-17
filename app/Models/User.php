@@ -17,12 +17,14 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable=[
+    protected $fillable = [
         'fullname',
         'username',
         'email',
+        'email_verified_at',
         'password',
         'tel',
+        'avatar',
         'role',
     ];
 
@@ -44,4 +46,10 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    // Producs Relationship
+    public function products()
+    {
+        return $this->hasMany(Product::class)->orderBy('id', 'desc');
+    }
 }
