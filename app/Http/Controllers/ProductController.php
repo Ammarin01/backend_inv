@@ -15,7 +15,10 @@ class ProductController extends Controller
     public function index()
     {
         // Read all product
-        return Product::all();
+        // return Product::all();
+
+        //อ่านข้อมูลแบบแบ่งหน้า
+        return Product::orderBy('id','desc')->paginate(25);
     }
 
     /**

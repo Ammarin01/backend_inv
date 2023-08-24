@@ -32,7 +32,6 @@ class UserSeeder extends Seeder
             'remember_token' => 'XBWyeaiest'
         ];
         User::create($data);
-
         // ทำการเรียกตัว UserFactory ที่จะทำการ Faker ข้อมูลให้
         User::factory(99)->create();
     }
