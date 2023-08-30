@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Image;
 
 class ProductController extends Controller
 {
@@ -38,7 +39,47 @@ class ProductController extends Controller
                 'slug' => 'required',
                 'price' => 'required',
             ]);
-            return Product::create($request->all());
+            $data_product = array(
+                'name' => $request->input('name'),
+                'slug' => $request->input('slug'),
+                'price' => $request->input('price'),
+                'description' => $request->input('description'),
+                'user_id' =>$user->id,
+            );
+            //รับไฟล์ภาพ
+            $image = $request->file();
+
+            //เช็คว่าผู้ใช้มีการอัพโหลดเข้ามาหรือไม่
+            if (!empty($image)) {
+                # code...
+                $file_name = "product_".time().".".$image->getClientOriginalExtension();
+
+                //กำหนดขนาดไฟล์
+                $imgWidth = 400;
+                $imgHeight = 400;
+                $folderupload = public_path('images/products/thumbnail');
+                $path = $folderupload."/".$file_name;
+
+                //อัพโหลด เข้าสู่ folder  thumbnail
+                $img = Image::make($image->getRealPath());
+                $img->orientate()->fit($imgHeight,$imgWidth, function($constraint){
+                    $constraint->upsize();
+                });
+                $img->save($path);
+
+                //อัพโหลดภาพต้นฉบับ folder original
+                $destinationPath = public_path('images/products/original');
+                $image->move($destinationPath,$file_name);
+
+                //กำหนด path รูปเพื่อใส่ตารางข้อมูล
+                $data_product['image'] = url('/').'images/products/thumbnail/'.$file_name;
+            }else{
+                $data_product['image'] = url('/').'images/products/thumbnail/no_img.png';
+            }
+            
+            // return response($data_product, 201);
+            // return response($request->all(), 201);
+            // return Product::create($request->all());
         } else {
             return [
                 'status' => 'Permission denied to create',
