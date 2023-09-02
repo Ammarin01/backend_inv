@@ -47,36 +47,42 @@ class ProductController extends Controller
                 'user_id' =>$user->id,
             );
             //รับไฟล์ภาพ
-            $image = $request->file();
+            $image = $request->file('file');
 
             //เช็คว่าผู้ใช้มีการอัพโหลดเข้ามาหรือไม่
-            if (!empty($image)) {
-                # code...
-                $file_name = "product_".time().".".$image->getClientOriginalExtension();
+           // เช็คว่าผู้ใช้มีการอัพโหลดภาพเข้ามาหรือไม่
+           if(!empty($image)){
 
-                //กำหนดขนาดไฟล์
-                $imgWidth = 400;
-                $imgHeight = 400;
-                $folderupload = public_path('images/products/thumbnail');
-                $path = $folderupload."/".$file_name;
+            // อัพโหลดรูปภาพ
+            // เปลี่ยนชื่อรูปที่ได้
+            $file_name = "product_".time().".".$image->getClientOriginalExtension();
 
-                //อัพโหลด เข้าสู่ folder  thumbnail
-                $img = Image::make($image->getRealPath());
-                $img->orientate()->fit($imgHeight,$imgWidth, function($constraint){
-                    $constraint->upsize();
-                });
-                $img->save($path);
+            // กำหนดขนาดความกว้าง และสูง ของภาพที่ต้องการย่อขนาด
+            $imgWidth = 400;
+            $imgHeight = 400;
+            $folderupload = public_path('/images/products/thumbnail');
+            $path = $folderupload."/".$file_name;
 
-                //อัพโหลดภาพต้นฉบับ folder original
-                $destinationPath = public_path('images/products/original');
-                $image->move($destinationPath,$file_name);
+            // อัพโหลดเข้าสู่ folder thumbnail
+            $img = Image::make($image->getRealPath());
+            $img->orientate()->fit($imgWidth,$imgHeight, function($constraint){
+                $constraint->upsize();
+            });
+            $img->save($path);
 
-                //กำหนด path รูปเพื่อใส่ตารางข้อมูล
-                $data_product['image'] = url('/').'images/products/thumbnail/'.$file_name;
-            }else{
-                $data_product['image'] = url('/').'images/products/thumbnail/no_img.png';
-            }
-            
+            // อัพโหลดภาพต้นฉบับเข้า folder original
+            $destinationPath = public_path('/images/products/original');
+            $image->move($destinationPath, $file_name);
+
+            // กำหนด path รูปเพื่อใส่ตารางในฐานข้อมูล
+            $data_product['image'] = url('/').'/images/products/thumbnail/'.$file_name;
+
+        }else{
+            $data_product['image'] = url('/').'/images/products/thumbnail/no_img.jpg';
+        }
+        //Create data to tabel product    
+        return Product::created($data_product);
+
             // return response($data_product, 201);
             // return response($request->all(), 201);
             // return Product::create($request->all());
