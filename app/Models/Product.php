@@ -19,8 +19,9 @@ class Product extends Model
     ];
     
     //Relationship to User
-    public function user(){
+    public function users(){
 
-        return $this->belongsTo(User::class);
+        //join user
+        return $this->belongsTo('App\Models\User','user_id')->select(['id','fullname','avatar']);
     }
 }

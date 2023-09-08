@@ -19,7 +19,9 @@ class ProductController extends Controller
         // return Product::all();
 
         //อ่านข้อมูลแบบแบ่งหน้า
-        return Product::orderBy('id','desc')->paginate(25);
+        // return Product::orderBy('id','desc')->paginate(25);
+        //return Product::with('ฟังก์ชัน','ตาราง')->orderBy('id','desc')->paginate(25);
+        return Product::with('users','users')->orderBy('id','desc')->paginate(25);
     }
 
     /**
@@ -35,16 +37,16 @@ class ProductController extends Controller
         if ($user->tokenCan("1")) {
             # code...
             $request->validate([
-                'name' => 'required|min:5',
+                'name' => 'required|min:3',
                 'slug' => 'required',
                 'price' => 'required',
             ]);
             $data_product = array(
                 'name' => $request->input('name'),
+                'description' => $request->input('description'),
                 'slug' => $request->input('slug'),
                 'price' => $request->input('price'),
-                'description' => $request->input('description'),
-                'user_id' =>$user->id,
+                'user_id' => $user->id
             );
             //รับไฟล์ภาพ
             $image = $request->file('file');
@@ -80,8 +82,11 @@ class ProductController extends Controller
         }else{
             $data_product['image'] = url('/').'/images/products/thumbnail/no_img.jpg';
         }
-        //Create data to tabel product    
-        return Product::created($data_product);
+        //Create data to tabel product
+        return Product::create($data_product);
+        // return $data_product;
+        
+            // return "OK";
 
             // return response($data_product, 201);
             // return response($request->all(), 201);
